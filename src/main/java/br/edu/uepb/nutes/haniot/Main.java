@@ -45,8 +45,8 @@ public class Main {
 		
 		while(true) {
 			System.out.println("Digite o número da Operação:\n"
-					+ "1- Adicionar uma Política - 20 Mbps\n"
-					+ "2- Adicionar uma Política - 10 Mbps\n"
+					+ "1- Adicionar uma Política - 10 Mbps\n"
+					+ "2- Adicionar uma Política - 20 Mbps\n"
 					+ "3- Remover uma Política\n"
 					+ "4- Mostrar todas as Políticas de todos os Switches\n"
 					+ "5- Mostra todas as Políticas de uim Switch\n"
@@ -59,10 +59,10 @@ public class Main {
 			
 			switch (option) {
 			case 1:
-				System.out.println(controller.highPriorityPolitic(3, 1));
+				System.out.println(controller.highPriorityPolitic("3", "1"));
 				break;
 			case 2:
-				System.out.println(controller.mediumPriorityPolitic(2, 1));
+				System.out.println(controller.mediumPriorityPolitic("2", "1"));
 				break;
 			case 3:
 				System.out.println(controller.removePolitic("flow-mod-2"));
