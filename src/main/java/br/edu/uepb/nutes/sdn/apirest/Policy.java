@@ -8,6 +8,8 @@ public class Policy {
 	private String actions;
 	private boolean active = true;
 	private String in_port;
+	private String ipv4_src;
+	private String ipv4_dst;
 	
 	public Policy(String switchId) {
 		// TODO Auto-generated constructor stub
@@ -74,6 +76,22 @@ public class Policy {
 
 	public void setInPort(String in_port) {
 		this.in_port = in_port;
+	}
+
+	public String getIpv4_src() {
+		return ipv4_src;
+	}
+
+	public void setIpv4_src(String ipv4_src) {
+		this.ipv4_src = ipv4_src;
+	}
+
+	public String getIpv4_dst() {
+		return ipv4_dst;
+	}
+
+	public void setIpv4_dst(String ipv4_dst) {
+		this.ipv4_dst = ipv4_dst;
 	}
 	
  

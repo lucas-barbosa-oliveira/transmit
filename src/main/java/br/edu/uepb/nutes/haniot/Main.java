@@ -14,7 +14,7 @@ public class Main {
 	public static void main(String[] args) throws URISyntaxException, Exception {
 		
 		// Escutando alarmes emitidos pelos dispositivos simulados no OpenICE
-//		JmsMessageListener.initializingAlarmListening();
+		JmsMessageListener.initializingAlarmListening();
 		
 //		long start = System.currentTimeMillis();
 //		
@@ -59,30 +59,33 @@ public class Main {
 			
 			switch (option) {
 			case 1:
-				System.out.println(controller.highPriorityPolitic("3", "1"));
+				System.out.println(controller.highPriorityPolitic(3, 1));
 				break;
 			case 2:
-				System.out.println(controller.mediumPriorityPolitic("2", "1"));
+				System.out.println(controller.mediumPriorityPolitic(2, 1));
 				break;
 			case 3:
-				System.out.println(controller.removePolitic("flow-mod-2"));
+				System.out.println(controller.removeHighPriorityPolitic());
 				break;
 			case 4:
-				System.out.println(controller.showAllSwitchesPolitics());
+				System.out.println(controller.removeMediumPriorityPolitic());
 				break;
 			case 5:
-				System.out.println(controller.showAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+				System.out.println(controller.showAllSwitchesPolitics());
 				break;
 			case 6:
-				System.out.println(controller.removeAllSwitchesPolitics());
+				System.out.println(controller.showAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
 				break;
 			case 7:
-				System.out.println(controller.removeAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+				System.out.println(controller.removeAllSwitchesPolitics());
 				break;
 			case 8:
+				System.out.println(controller.removeAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+				break;
+			case 9:
 				System.out.println(controller.showAllDevicesOfSwitch());
 				break;				
-			case 9:
+			case 10:
 				System.out.println(controller.showAllSwitches());
 				break;
 
