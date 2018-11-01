@@ -8,17 +8,17 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class SwitchController extends ServerCommunication{
 
-	Policy policy = new Policy("00:00:c0:25:e9:01:28:2a");
-
-	public JsonNode highPriorityPolitic(int inPort, int outPort) throws UnirestException {	
+	public JsonNode highPriorityPolitic(String ipSource, int inPort, int outPort) throws UnirestException {	
 
 		//		 "{'switch':'00:00:c0:25:e9:01:28:2a', 'name':'flow-mod-2', 'cookie':'0', 'priority':'32768', 'in_port':'"+inPort+"','active':'true', 'actions':'set_queue=123,output='"+outPort+"'}";
 
+		Policy policy = new Policy("00:00:c0:25:e9:01:28:2a");
+		
 		Actions actions = new Actions();
 		actions.setOutput(String.valueOf(outPort));
-		actions.setSet_queue("123");
+		actions.setSet_queue("234");
 
-		policy.setName("queue20Mbps");
+		policy.setName(ipSource);
 		policy.setInPort(String.valueOf(inPort));
 		policy.setActions(actions);
 
@@ -34,12 +34,16 @@ public class SwitchController extends ServerCommunication{
 	
 	public JsonNode highPriorityPolitic(String ipSource, String ipDestiny) throws UnirestException {	
 
+		Policy policy = new Policy("00:00:c0:25:e9:01:28:2a");
+		
 		Actions actions = new Actions();
-		actions.setSet_queue("123");
+		actions.setSet_queue("234");
+		actions.setOutput(String.valueOf(1));
 
-		policy.setName("queue20Mbps");
+		policy.setName(ipSource);
 		policy.setIpv4_src(ipSource);
 		policy.setIpv4_dst(ipDestiny);
+		policy.setEth_type("0x0800");
 		policy.setActions(actions);
 
 		Gson gson = new Gson();
@@ -52,13 +56,15 @@ public class SwitchController extends ServerCommunication{
 
 	}
 
-	public JsonNode mediumPriorityPolitic(int inPort, int outPort) throws UnirestException {	
+	public JsonNode mediumPriorityPolitic(String ipSource, int inPort, int outPort) throws UnirestException {	
 
+		Policy policy = new Policy("00:00:c0:25:e9:01:28:2a");
+		
 		Actions actions = new Actions();
 		actions.setOutput(String.valueOf(outPort));
 		actions.setSet_queue("123");
 
-		policy.setName("queue10Mbps");
+		policy.setName(ipSource);
 		policy.setInPort(String.valueOf(inPort));
 		policy.setActions(actions);
 
@@ -74,12 +80,16 @@ public class SwitchController extends ServerCommunication{
 	
 	public JsonNode mediumPriorityPolitic(String ipSource, String ipDestiny) throws UnirestException {	
 
+		Policy policy = new Policy("00:00:c0:25:e9:01:28:2a");
+		
 		Actions actions = new Actions();
 		actions.setSet_queue("123");
+		actions.setOutput(String.valueOf(1));
 
-		policy.setName("queue20Mbps");
+		policy.setName(ipSource);
 		policy.setIpv4_src(ipSource);
 		policy.setIpv4_dst(ipDestiny);
+		policy.setEth_type("0x0800");
 		policy.setActions(actions);
 
 		Gson gson = new Gson();
@@ -92,19 +102,19 @@ public class SwitchController extends ServerCommunication{
 
 	}
 
-	public JsonNode removeHighPriorityPolitic() throws UnirestException {	
+	public JsonNode removeHighPriorityPolitic(String ipSource) throws UnirestException {	
 
 		JSONObject body = new JSONObject();
-		body.put("name", "queue20Mbps");
+		body.put("name", ipSource);
 
 		return deleteServerData("/wm/staticentrypusher/json", body);
 
 	}
 
-	public JsonNode removeMediumPriorityPolitic() throws UnirestException {	
+	public JsonNode removeMediumPriorityPolitic(String ipSource) throws UnirestException {	
 
 		JSONObject body = new JSONObject();
-		body.put("name", "queue10Mbps");
+		body.put("name", ipSource);
 
 		return deleteServerData("/wm/staticentrypusher/json", body);
 

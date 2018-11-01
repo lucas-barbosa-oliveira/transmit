@@ -10,6 +10,7 @@ public class Policy {
 	private String in_port;
 	private String ipv4_src;
 	private String ipv4_dst;
+	private String eth_type;
 	
 	public Policy(String switchId) {
 		// TODO Auto-generated constructor stub
@@ -93,6 +94,15 @@ public class Policy {
 	public void setIpv4_dst(String ipv4_dst) {
 		this.ipv4_dst = ipv4_dst;
 	}
+
+	public String getEth_type() {
+		return eth_type;
+	}
+
+	public void setEth_type(String eth_type) {
+		this.eth_type = eth_type;
+	}
+	
 	
  
 }

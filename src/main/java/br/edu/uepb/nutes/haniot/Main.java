@@ -45,47 +45,56 @@ public class Main {
 		
 		while(true) {
 			System.out.println("Digite o número da Operação:\n"
-					+ "1- Adicionar uma Política - 10 Mbps\n"
-					+ "2- Adicionar uma Política - 20 Mbps\n"
-					+ "3- Remover uma Política\n"
-					+ "4- Mostrar todas as Políticas de todos os Switches\n"
-					+ "5- Mostra todas as Políticas de uim Switch\n"
-					+ "6- Remover todas as Políticas de todos os Switches\n"
-					+ "7- Remover todas as Políticas de um Switch\n"
-					+ "8- Mostrar todos os dispositivos conectados\n"
-					+ "9- Mostrar todos os Switches conectados");
+					+ "1- Adicionar uma Política - 20 Mbps - Por Porta\n"
+					+ "2- Adicionar uma Política - 10 Mbps - Por Porta\n"
+					+ "3- Adicionar uma Política - 20 Mbps - Por IPv4\n"
+					+ "4- Adicionar uma Política - 10 Mbps - Por IPv4\n"
+					+ "5- Remover  uma Política - 20 Mbps\n"
+					+ "6- Remover  uma Política - 10 Mbps\n"
+					+ "7- Mostrar todas as Políticas de todos os Switches\n"
+					+ "8- Mostra todas as Políticas de uim Switch\n"
+					+ "9- Remover todas as Políticas de todos os Switches\n"
+					+ "10- Remover todas as Políticas de um Switch\n"
+					+ "11- Mostrar todos os dispositivos conectados\n"
+					+ "12- Mostrar todos os Switches conectados");
 			
 			int option = scanner.nextInt();
 			
 			switch (option) {
 			case 1:
-				System.out.println(controller.highPriorityPolitic(3, 1));
+				System.out.println(controller.highPriorityPolitic("192.168.3.3", 3, 1));
 				break;
 			case 2:
-				System.out.println(controller.mediumPriorityPolitic(2, 1));
+				System.out.println(controller.mediumPriorityPolitic("192.168.3.2", 2, 1));
 				break;
 			case 3:
-				System.out.println(controller.removeHighPriorityPolitic());
+				System.out.println(controller.highPriorityPolitic("192.168.3.3", "192.168.3.1"));
 				break;
 			case 4:
-				System.out.println(controller.removeMediumPriorityPolitic());
+				System.out.println(controller.mediumPriorityPolitic("192.168.3.2", "192.168.3.1"));
 				break;
 			case 5:
-				System.out.println(controller.showAllSwitchesPolitics());
+//				System.out.println(controller.removeHighPriorityPolitic());
 				break;
 			case 6:
-				System.out.println(controller.showAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+//				System.out.println(controller.removeMediumPriorityPolitic());
 				break;
 			case 7:
-				System.out.println(controller.removeAllSwitchesPolitics());
+				System.out.println(controller.showAllSwitchesPolitics());
 				break;
 			case 8:
-				System.out.println(controller.removeAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+				System.out.println(controller.showAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
 				break;
 			case 9:
+				System.out.println(controller.removeAllSwitchesPolitics());
+				break;
+			case 10:
+				System.out.println(controller.removeAllSwitchPolitcs("00:00:c0:25:e9:01:28:2a"));
+				break;
+			case 11:
 				System.out.println(controller.showAllDevicesOfSwitch());
 				break;				
-			case 10:
+			case 12:
 				System.out.println(controller.showAllSwitches());
 				break;
 
