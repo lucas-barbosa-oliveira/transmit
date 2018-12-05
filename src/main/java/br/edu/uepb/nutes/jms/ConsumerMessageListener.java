@@ -10,14 +10,14 @@ import javax.jms.TextMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.gson.Gson;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import br.edu.uepb.nutes.sdn.apirest.SwitchController;
 
 public class ConsumerMessageListener implements MessageListener {
+	@SuppressWarnings("unused")
 	private String consumerName;
-	private static String hostIp = "127.0.0.1";
+	private static String hostIp = "192.168.3.1";
 
 	public ConsumerMessageListener(String consumerName) {
 		this.consumerName = consumerName;
@@ -29,6 +29,8 @@ public class ConsumerMessageListener implements MessageListener {
 			
 			JSONObject alarm= new JSONObject(textMessage.getText());
 			
+			System.out.println(alarm);
+			
 			String deviceId=null;
 			for (Iterator<String> iterator = alarm.keys(); iterator.hasNext();) {
 				deviceId = (String) iterator.next();
@@ -36,21 +38,23 @@ public class ConsumerMessageListener implements MessageListener {
 			
 			if (deviceId!=null) {
 				SwitchController controller = new SwitchController();
+				System.out.println(controller.showAllSwitchesPolitics());
 				
 				if(!alarm.getJSONObject(deviceId).get("Text").toString().equals("NORMAL")) {
-					controller.mediumPriorityPolitic(alarm.getJSONObject(deviceId).get("Address").toString(), hostIp);
+					controller.mediumPriorityPolitic(alarm.getJSONObject(deviceId).get("Address").toString().replace(" ", ""), hostIp);
 				}else {
-					controller.removeMediumPriorityPolitic(alarm.getJSONObject(deviceId).get("Address").toString());
+					controller.removeMediumPriorityPolitic(alarm.getJSONObject(deviceId).get("Address").toString().replace(" ", ""));
 				}
 			}
-		} catch (JMSException e) {
-			e.printStackTrace();
 		} catch (JSONException e) {
+			e.printStackTrace();
+		}  catch (JMSException  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnirestException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Problema na conexão com o Controlador");
+//			e.printStackTrace();
 		}
 	}
 

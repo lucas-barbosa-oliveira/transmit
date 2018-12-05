@@ -4,16 +4,14 @@ import java.util.Iterator;
 
 import org.json.JSONObject;
 
-import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
-import com.mashape.unirest.request.body.RequestBodyEntity;
 
 public abstract class ServerCommunication {
 
-	String hostIp = "http://127.0.0.1:8080";
+	String hostIp = "http://127.0.0.1:4321";
 
 	JsonNode getServerData(String url, JSONObject params) throws UnirestException {
 

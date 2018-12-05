@@ -106,6 +106,8 @@ public class SwitchController extends ServerCommunication{
 
 		JSONObject body = new JSONObject();
 		body.put("name", ipSource);
+		
+		System.out.println(body);
 
 		return deleteServerData("/wm/staticentrypusher/json", body);
 
@@ -115,6 +117,8 @@ public class SwitchController extends ServerCommunication{
 
 		JSONObject body = new JSONObject();
 		body.put("name", ipSource);
+		
+		System.out.println(body);
 
 		return deleteServerData("/wm/staticentrypusher/json", body);
 

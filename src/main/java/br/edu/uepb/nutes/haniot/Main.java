@@ -2,11 +2,11 @@ package br.edu.uepb.nutes.haniot;
 
 import java.net.URISyntaxException;
 import java.util.Scanner;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import br.edu.uepb.nutes.gateway.apirest.ServerCommunication;
-import br.edu.uepb.nutes.gateway.apirest.SuperUser;
+//
+//import com.mashape.unirest.http.exceptions.UnirestException;
+//
+//import br.edu.uepb.nutes.gateway.apirest.ServerCommunication;
+//import br.edu.uepb.nutes.gateway.apirest.SuperUser;
 import br.edu.uepb.nutes.jms.JmsMessageListener;
 import br.edu.uepb.nutes.sdn.apirest.SwitchController;
 
@@ -41,6 +41,7 @@ public class Main {
 		
 		SwitchController controller = new SwitchController();
 		
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		
 		while(true) {
