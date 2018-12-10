@@ -9,11 +9,11 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 
-public abstract class ServerCommunication {
+public class ServerCommunication {
 
-	String hostIp = "http://127.0.0.1:4321";
+	private static String hostIp = "http://127.0.0.1:8080";
 
-	JsonNode getServerData(String url, JSONObject params) throws UnirestException {
+	static JsonNode getServerData(String url, JSONObject params) throws UnirestException {
 
 		GetRequest response = Unirest.get(hostIp + url);
 
@@ -24,31 +24,22 @@ public abstract class ServerCommunication {
 
 		return response.asJson().getBody();
 	}
-	
-	JsonNode getServerData(String url) throws UnirestException {
 
-		return Unirest.get(hostIp + url)
-				.asJson()
+	static JsonNode getServerData(String url) throws UnirestException {
+
+		return Unirest.get(hostIp + url).asJson().getBody();
+	}
+
+	static JsonNode postServerData(String url, Object body) throws UnirestException {
+
+		return Unirest.post(hostIp + url).header("Content-Type", "application/json").body(body.toString()).asJson()
 				.getBody();
 	}
 
-	JsonNode postServerData(String url, Object body) throws UnirestException {
+	static JsonNode deleteServerData(String url, Object body) throws UnirestException {
 
-		return Unirest.post(hostIp + url)
-				.header("Content-Type", "application/json")
-				.body(body.toString())
-				.asJson()
+		return Unirest.delete(hostIp + url).header("Content-Type", "application/json").body(body.toString()).asJson()
 				.getBody();
 	}
-	
-	JsonNode deleteServerData(String url, Object body) throws UnirestException {
-
-		return Unirest.delete(hostIp + url)
-				.header("Content-Type", "application/json")
-				.body(body.toString())
-				.asJson()
-				.getBody();
-	}
-
 
 }
