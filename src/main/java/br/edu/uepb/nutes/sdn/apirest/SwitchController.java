@@ -11,6 +11,43 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class SwitchController extends ServerCommunication {
 
+	static public JsonNode insertPolitic(String switchId, String politicName, Port inPort) throws UnirestException {
+
+		// "{'switch':'00:00:c0:25:e9:01:28:2a', 'name':'flow-mod-2', 'cookie':'0',
+		// 'priority':'32768', 'in_port':'"+inPort+"','active':'true',
+		// 'actions':'set_queue=123,output='"+outPort+"'}";
+
+		Policy policy = new Policy(switchId);
+
+		Actions actions = new Actions();
+		actions.setOutput(String.valueOf(Category.MONITORING_CENTRAL.getPortNumber()));
+		actions.setSet_queue(Integer.toString(inPort.getCategory().getPortNumber()));
+
+		policy.setName(politicName);
+		policy.setInPort(String.valueOf(inPort.getCategory().getPortNumber()));
+		policy.setActions(actions);
+
+		Gson gson = new Gson();
+
+		String policyJson = gson.toJson(policy).replaceFirst("switchId", "switch");
+
+		System.out.println(policyJson);
+
+		return postServerData("/wm/staticentrypusher/json", policyJson);
+
+	}
+	
+	static public JsonNode removePolitic(String politicName) throws UnirestException {
+
+		JSONObject body = new JSONObject();
+		body.put("name", politicName);
+
+		System.out.println(body);
+
+		return deleteServerData("/wm/staticentrypusher/json", body);
+
+	}
+
 	public JsonNode highPriorityPolitic(String ipSource, int inPort, int outPort) throws UnirestException {
 
 		// "{'switch':'00:00:c0:25:e9:01:28:2a', 'name':'flow-mod-2', 'cookie':'0',
@@ -261,9 +298,9 @@ public class SwitchController extends ServerCommunication {
 
 			String command = "ovs-vsctl --db=ptcp:6640 --id=@queue create queue";
 
-			command += " other-config:min-rate=" + port.getPeakDataRate();
+			command += " other-config:max-rate=" + port.getPeakDataRate();
 
-			command += " -- set qos " + port.getQosMonitoringCentral() + " queue:" + port.getNumber() + "=@queue ";
+			command += " -- set qos " + port.getQosMonitoringCentral() + " queue:" + port.getCategory().getPortNumber() + "=@queue ";
 
 			proc = rt.exec(command);
 			proc.waitFor();
@@ -273,8 +310,9 @@ public class SwitchController extends ServerCommunication {
 			boolean result = proc.exitValue() == 0;
 
 			if (result) {
+				port.setMinRateQueueMonitoringCentral(port.getPeakDataRate());
 				port.setUuidQueueMonitoringCentral(response);
-				System.out.println("Porta: " + port.getNumber() + "UUID: " + response
+				System.out.println("Porta: " + port.getCategory().getPortNumber() + " UUID: " + response
 						+ " Criação de Fila Realizada COM SUCESSO!!!");
 				return true;
 			} else {
@@ -294,21 +332,14 @@ public class SwitchController extends ServerCommunication {
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
 		try {
-			if (port.getQosMonitoringCentral() == null && port.getUuidQueueMonitoringCentral() == null) {
+			if (port.getQosMonitoringCentral() != null && port.getUuidQueueMonitoringCentral() != null) {
 				proc = rt.exec("ovs-vsctl --db=ptcp:6640 set queue " + port.getUuidQueueMonitoringCentral()
-						+ " other-config:min-rate=" + port.getPeakDataRate());
+						+ " other-config:max-rate=" + port.getPeakDataRate());
 				proc.waitFor();
 
-				BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-				String response = stdInput.readLine();
-
-				System.out.println(response);
-
 				if (proc.exitValue() == 0) {
-					port.setUuidQueueMonitoringCentral(response);
-					System.out.println("Porta: " + port.getNumber() + "UUID: " + response
-							+ " ATUALIZAÇÃO de Fila Realizada COM SUCESSO!!!");
+					port.setMinRateQueueMonitoringCentral(port.getPeakDataRate());
+					System.out.println("Porta: " + port.getCategory().getPortNumber() + " ATUALIZAÇÃO de Fila Realizada COM SUCESSO!!!");
 					return true;
 				} else {
 					System.out.println(" ATUALIZAÇÃO de Fila Realizada SEM SUCESSO!!!");
@@ -319,11 +350,6 @@ public class SwitchController extends ServerCommunication {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		return false;
-	}
-
-	static public boolean queryQueue(String uuid) {
 
 		return false;
 	}

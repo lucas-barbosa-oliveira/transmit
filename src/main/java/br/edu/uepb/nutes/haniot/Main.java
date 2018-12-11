@@ -11,8 +11,8 @@ import br.edu.uepb.nutes.sdn.apirest.PortManager;
 public class Main {
 	public static void main(String[] args) throws URISyntaxException, Exception {
 //		Port port1 = new Port(1, 1, Category.MONITORING_CENTRAL);
-		Port port2 = new Port(2, 2, Category.MEDICAL_DEVICES);
-		Port port3 = new Port(3, 3, Category.CALL_VOIP);
+		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
+		Port port3 = new Port(Category.CALL_VOIP, 3);
 //		Port port4 = new Port(4, 4, Category.RMI_IMAGES);
 		
 		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3));

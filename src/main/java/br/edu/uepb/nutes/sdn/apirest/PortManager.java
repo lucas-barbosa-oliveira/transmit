@@ -15,9 +15,9 @@ public class PortManager {
 		try {
 			if (SwitchController.initConfigurationSwitch() && SwitchController.initializeStatistiCollection()) {
 				portInformation = ports;
-				
+
 				for (Port port : portInformation) {
-					System.out.println("Port:" + port.getNumber());
+					System.out.println("Port:" + port.getCategory().getPortNumber());
 					port.initFlowMonitoring(switchId);
 				}
 			}
@@ -32,8 +32,8 @@ public class PortManager {
 
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
-			if (port.getNumber()  == number) {
-				port.setPeakDataRate(peakDataRte);
+			if (port.getCategory().getPortNumber() == number) {
+				port.setPeakDataRate(peakDataRte*30/70);
 				return true;
 			}
 		}
@@ -44,7 +44,7 @@ public class PortManager {
 
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
-			if (port.getNumber()  == number) {
+			if (port.getCategory().getPortNumber() == number) {
 				port.setActived(actived);
 				return true;
 			}
@@ -56,13 +56,16 @@ public class PortManager {
 
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
-			if (port.getNumber() == number && port.getPeakDataRate() < peakDataRte) {
-				port.setPeakDataRate(peakDataRte);
+			if (port.getCategory().getPortNumber() == number) {
+				long weightedAverage = (port.getPeakDataRate() * 3 + peakDataRte * 7) / 10;
+				port.setPeakDataRate(weightedAverage);
 				port.setActived(actived);
 				return true;
 			}
 		}
 		return false;
+//		(6*3+6*7)/10 = 6
+//		(((4+8+6)/2))/2 = 4,4
 	}
 
 	public static String getPortInformation() {
@@ -70,8 +73,8 @@ public class PortManager {
 		String response = "";
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
-			response = response + "Port: " + port.getNumber() + " Peak Data Rate: " + port.getPeakDataRate()
-					+ " Actived: " + port.isActived() + "\n";
+			response = response + "Port: " + port.getCategory().getPortNumber() + " Peak Data Rate: "
+					+ port.getPeakDataRate() + " Actived: " + port.isActived() + "\n";
 		}
 
 		response = response + "\n\n\n";
