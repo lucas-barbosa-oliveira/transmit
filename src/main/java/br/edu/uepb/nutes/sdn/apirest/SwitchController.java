@@ -2,6 +2,8 @@ package br.edu.uepb.nutes.sdn.apirest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 
@@ -10,6 +12,10 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class SwitchController extends ServerCommunication {
+	
+	final static String OVS = "ovs-vsctl --db=ptcp:6640";
+	
+//	final static String OVS = "ovs-vsctl --db=tcp:192.168.2.1:6640";
 
 	static public JsonNode insertPolitic(String switchId, String politicName, Port inPort) throws UnirestException {
 
@@ -21,7 +27,11 @@ public class SwitchController extends ServerCommunication {
 
 		Actions actions = new Actions();
 		actions.setOutput(String.valueOf(Category.MONITORING_CENTRAL.getPortNumber()));
-		actions.setSet_queue(Integer.toString(inPort.getCategory().getPortNumber()));
+		
+		if(inPort.getCategory().getPriority() == null)
+			actions.setSet_queue("0");
+		else
+			actions.setSet_queue(Integer.toString(inPort.getCategory().getPortNumber()));
 
 		policy.setName(politicName);
 		policy.setInPort(String.valueOf(inPort.getCategory().getPortNumber()));
@@ -181,7 +191,7 @@ public class SwitchController extends ServerCommunication {
 
 	}
 
-	public JsonNode removeAllSwitchesPolitics() throws UnirestException {
+	static public JsonNode removeAllSwitchesPolitics() throws UnirestException {
 
 		return getServerData("/wm/staticentrypusher/clear/all/json");
 
@@ -243,11 +253,19 @@ public class SwitchController extends ServerCommunication {
 	}
 
 	static public boolean initConfigurationSwitch() {
+		
+		try {
+			removeAllSwitchesPolitics();
+		} catch (UnirestException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
 		String response;
 		try {
-			proc = rt.exec("ovs-vsctl --db=ptcp:6640 list qos");
+			proc = rt.exec(OVS +" list qos");
 			proc.waitFor();
 
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -255,14 +273,15 @@ public class SwitchController extends ServerCommunication {
 			response = stdInput.readLine();
 			System.out.println(response);
 			if (response != null && (proc.exitValue() == 0)) {
-				proc = rt.exec("ovs-vsctl --db=ptcp:6640 clear port " + Category.MONITORING_CENTRAL.getInterfacePort()
+				proc = rt.exec(OVS +" clear port " + Category.MONITORING_CENTRAL.getInterfacePort()
 						+ " qos -- --all destroy qos -- --all destroy queue");
 				proc.waitFor();
 			}
 
 			if (proc.exitValue() == 0) {
-				proc = rt.exec("ovs-vsctl --db=ptcp:6640 set port " + Category.MONITORING_CENTRAL.getInterfacePort()
-						+ " qos=@newqos -- --id=@newqos create qos type=linux-htb other-config:max-rate=1000000000");
+				proc = rt.exec(OVS +" set port " + Category.MONITORING_CENTRAL.getInterfacePort()
+						+ " qos=@newqos -- --id=@newqos create qos type=linux-htb other-config:max-rate=50000000 queues:0=@newqueue"
+						+ " -- --id=@newqueue create queue other-config:min-rate=0 other-config:priority=10");
 				proc.waitFor();
 				return true;
 			}
@@ -282,8 +301,8 @@ public class SwitchController extends ServerCommunication {
 		Process proc = null;
 		String response;
 		try {
-			if (port.getQosMonitoringCentral() == null) {
-				proc = rt.exec("ovs-vsctl --db=ptcp:6640 get port " + Category.MONITORING_CENTRAL.getInterfacePort()
+			if (port.getQueue().getUuidQosMonitoringCentral() == null) {
+				proc = rt.exec(OVS +" get port " + Category.MONITORING_CENTRAL.getInterfacePort()
 						+ " qos ");
 				proc.waitFor();
 
@@ -293,14 +312,18 @@ public class SwitchController extends ServerCommunication {
 
 				System.out.println(response);
 
-				port.setQosMonitoringCentral(response);
+				port.getQueue().setUuidQosMonitoringCentral(response);
 			}
 
-			String command = "ovs-vsctl --db=ptcp:6640 --id=@queue create queue";
+			String command = OVS +" --id=@queue create queue";
 
-			command += " other-config:max-rate=" + port.getPeakDataRate();
+			command += " other-config:min-rate=" + port.getQueue().getMinRate();
+			
+			command += " other-config:priority=" + port.getCategory().getPriority();
+			
+			command += " other-config:burst=" + port.getQueue().getBurst();
 
-			command += " -- set qos " + port.getQosMonitoringCentral() + " queue:" + port.getCategory().getPortNumber() + "=@queue ";
+			command += " -- set qos " + port.getQueue().getUuidQosMonitoringCentral() + " queue:" + port.getCategory().getPortNumber() + "=@queue ";
 
 			proc = rt.exec(command);
 			proc.waitFor();
@@ -310,8 +333,8 @@ public class SwitchController extends ServerCommunication {
 			boolean result = proc.exitValue() == 0;
 
 			if (result) {
-				port.setMinRateQueueMonitoringCentral(port.getPeakDataRate());
-				port.setUuidQueueMonitoringCentral(response);
+//				port.getQueue().setMinRate(port.getThroughputRate();
+				port.getQueue().setUuidQueueMonitoringCentral(response);
 				System.out.println("Porta: " + port.getCategory().getPortNumber() + " UUID: " + response
 						+ " Criação de Fila Realizada COM SUCESSO!!!");
 				return true;
@@ -332,13 +355,15 @@ public class SwitchController extends ServerCommunication {
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
 		try {
-			if (port.getQosMonitoringCentral() != null && port.getUuidQueueMonitoringCentral() != null) {
-				proc = rt.exec("ovs-vsctl --db=ptcp:6640 set queue " + port.getUuidQueueMonitoringCentral()
-						+ " other-config:max-rate=" + port.getPeakDataRate());
+			if (port.getQueue().getUuidQosMonitoringCentral() != null && port.getQueue().getUuidQueueMonitoringCentral() != null) {
+				proc = rt.exec(OVS + " set queue " + port.getQueue().getUuidQueueMonitoringCentral()
+						+ " other-config:min-rate=" + port.getQueue().getMinRate()
+						+ " other-config:priority=" +  port.getCategory().getPriority()
+						+ " other-config:burst=" + port.getQueue().getBurst());
 				proc.waitFor();
 
 				if (proc.exitValue() == 0) {
-					port.setMinRateQueueMonitoringCentral(port.getPeakDataRate());
+//					port.setMinRateQueueMonitoringCentral(port.getPeakDataRate());
 					System.out.println("Porta: " + port.getCategory().getPortNumber() + " ATUALIZAÇÃO de Fila Realizada COM SUCESSO!!!");
 					return true;
 				} else {
@@ -352,5 +377,41 @@ public class SwitchController extends ServerCommunication {
 		}
 
 		return false;
+	}
+
+	static public JSONObject getPortStatistics(String switchId, int queue_id) {
+		try {
+			
+			String result = getsServerData("/wm/core/switch/" + switchId + "/queue/json").replaceAll("\"\"","\",\"").replaceAll("]}","");
+			
+			result = result.split(Pattern.quote("["))[1].replaceAll(",\"duration_nsec\"", "-\"duration_nsec\"").replaceAll("\"", "");
+			
+			String [] queues = result.split("-");
+			
+			ArrayList<JSONObject> queueJson = new ArrayList<JSONObject>();
+			
+			for (int i = 0; i < queues.length; i++) {
+				JSONObject pacialQueue = new JSONObject();
+				String [] queueValues = queues[i].split(",");
+				for(int j = 0; j < queueValues.length; j=j+2) {
+					if(queueValues[j].equals("tx_errors"))
+						pacialQueue.append(queueValues[j], Long.parseLong(queueValues[j+1]));
+					else
+						pacialQueue.put(queueValues[j], Long.parseLong(queueValues[j+1]));
+				}
+				queueJson.add(pacialQueue);
+			}
+			
+			for (JSONObject queue : queueJson) {
+				if(queue.getInt("queue_id") == queue_id)
+					return queue;
+			}
+			return null;
+		} catch (UnirestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }

@@ -3,23 +3,53 @@ package br.edu.uepb.nutes.haniot;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+//import java.util.regex.Pattern;
+//
+//import javax.swing.SwingConstants;
+//
+//import org.json.JSONObject;
 
 import br.edu.uepb.nutes.sdn.apirest.Category;
 import br.edu.uepb.nutes.sdn.apirest.Port;
 import br.edu.uepb.nutes.sdn.apirest.PortManager;
+//import br.edu.uepb.nutes.sdn.apirest.SwitchController;
 
 public class Main {
 	public static void main(String[] args) throws URISyntaxException, Exception {
 //		Port port1 = new Port(1, 1, Category.MONITORING_CENTRAL);
 		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
-		Port port3 = new Port(Category.CALL_VOIP, 3);
+		Port port3 = new Port(Category.RMI_IMAGES, 3);
 //		Port port4 = new Port(4, 4, Category.RMI_IMAGES);
-		
+
 		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3));
-		
+
+		@SuppressWarnings("unused")
 		PortManager manager = new PortManager("00:00:c0:25:e9:01:28:2a", ports);
 		// Escutando alarmes emitidos pelos dispositivos simulados no OpenICE
 //		JmsMessageListener.initializingAlarmListening();
+
+//		while(true) {
+//			JSONObject queueValue = SwitchController.getPortStatistics("00:00:c0:25:e9:01:28:2a", 123);
+//
+//			long first_duration_sec = queueValue.getLong("duration_sec");
+//			long first_tx_bytes = queueValue.getLong("tx_bytes");
+//
+//			System.out.println("first_duration_sec : " + first_duration_sec + " first_tx_bytes: " + first_tx_bytes);
+//
+//			Thread.sleep(2000);
+//
+//			queueValue = SwitchController.getPortStatistics("00:00:c0:25:e9:01:28:2a", 123);
+//
+//			long second_duration_sec = queueValue.getLong("duration_sec");
+//			long second_tx_bytes = queueValue.getLong("tx_bytes");
+//
+//			System.out.println("second_duration_sec : " + second_duration_sec + " second_tx_bytes: " + second_tx_bytes);
+//			
+//			int bandwidth = (int) (((second_tx_bytes - first_tx_bytes) * 8) / (second_duration_sec - first_duration_sec));
+//			
+//			System.out.println(bandwidth + "bps");
+//		}
+//		
 
 //		long start = System.currentTimeMillis();
 //		

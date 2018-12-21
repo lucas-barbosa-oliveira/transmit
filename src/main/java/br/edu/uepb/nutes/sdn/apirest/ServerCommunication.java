@@ -24,6 +24,11 @@ public class ServerCommunication {
 
 		return response.asJson().getBody();
 	}
+	
+	static String getsServerData(String url) throws UnirestException {
+
+		return Unirest.get(hostIp + url).asString().getBody().toString();
+	}
 
 	static JsonNode getServerData(String url) throws UnirestException {
 

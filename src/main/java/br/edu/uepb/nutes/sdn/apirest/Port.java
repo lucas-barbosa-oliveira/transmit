@@ -4,10 +4,10 @@ public class Port {
 
 	//private int number;
 	private boolean actived = false;
-	private long peakDataRate = 0;
+	private boolean entryFlow = false;
+//	private long throughputRate = 0;
 	private int time;
-	private String uuidQosMonitoringCentral;
-	private String uuidQueueMonitoringCentral;
+
 	private long minRateQueueMonitoringCentral;
 	
 	private Category category;
@@ -19,6 +19,7 @@ public class Port {
 //		this.number = number;
 		this.time = time;
 		this.category = category;
+		queue = new Queue();
 	}
 
 //	public int getNumber() {
@@ -37,12 +38,20 @@ public class Port {
 		this.actived = actived;
 	}
 
-	public long getPeakDataRate() {
-		return peakDataRate;
+//	public long getThroughputRate() {
+//		return throughputRate;
+//	}
+//
+//	public void setThroughputRate(long throughputRate) {
+//		this.throughputRate = throughputRate;
+//	}
+
+	public boolean isEntryFlow() {
+		return entryFlow;
 	}
 
-	public void setPeakDataRate(long peakDataRte) {
-		this.peakDataRate = peakDataRte;
+	public void setEntryFlow(boolean entryFlow) {
+		this.entryFlow = entryFlow;
 	}
 
 	public int getTime() {
@@ -51,22 +60,6 @@ public class Port {
 
 	public void setTime(int time) {
 		this.time = time;
-	}
-	
-	public String getQosMonitoringCentral() {
-		return uuidQosMonitoringCentral;
-	}
-
-	public void setQosMonitoringCentral(String qosMonitoringCentral) {
-		this.uuidQosMonitoringCentral = qosMonitoringCentral;
-	}
-	
-	public String getUuidQueueMonitoringCentral() {
-		return uuidQueueMonitoringCentral;
-	}
-
-	public void setUuidQueueMonitoringCentral(String uuidQueueMonitoringCentral) {
-		this.uuidQueueMonitoringCentral = uuidQueueMonitoringCentral;
 	}
 
 	public long getMinRateQueueMonitoringCentral() {

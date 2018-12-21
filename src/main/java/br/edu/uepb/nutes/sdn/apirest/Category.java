@@ -5,7 +5,7 @@ public enum Category {
 	MEDICAL_DEVICES("eth0.4", 2, 1),
 	CALL_VOIP("eth0.5", 3, 2),
 	PESSONAL_MEDICAL_DEVICES("br-lan", 6, 3),
-	RMI_IMAGES("br-lan", 6, null),
+	RMI_IMAGES("eth0.5", 3, null),
 	DICOM_IMAGES("br-lan", 6, null),
 	BROWSER("br-lan", 6, null);
 	

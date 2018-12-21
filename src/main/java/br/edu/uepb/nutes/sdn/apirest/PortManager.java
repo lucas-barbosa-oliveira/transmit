@@ -28,12 +28,14 @@ public class PortManager {
 
 	}
 
-	public static boolean updatePortMonitoring(int number, long peakDataRte) {
+	public static boolean updatePortMonitoring(int number, long newPeakDataRte) {
 
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
 			if (port.getCategory().getPortNumber() == number) {
-				port.setPeakDataRate(peakDataRte*30/70);
+				port.getQueue().setMinRate(port.getQueue().getMinRate() + (newPeakDataRte*30/70));
+				if(port.getQueue().getBurst() < newPeakDataRte)
+					port.getQueue().setBurst(newPeakDataRte);
 				return true;
 			}
 		}
@@ -52,14 +54,16 @@ public class PortManager {
 		return false;
 	}
 
-	public static boolean updatePortMonitoring(int number, long peakDataRte, boolean actived) {
+	public static boolean updatePortMonitoring(int number, long newPeakDataRte, boolean actived) {
 
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
 			if (port.getCategory().getPortNumber() == number) {
-				long weightedAverage = (port.getPeakDataRate() * 3 + peakDataRte * 7) / 10;
-				port.setPeakDataRate(weightedAverage);
+				long weightedAverage = (port.getQueue().getMinRate() * 3 + newPeakDataRte * 7) / 10;
+				port.getQueue().setMinRate(weightedAverage);
 				port.setActived(actived);
+				if(port.getQueue().getBurst() < newPeakDataRte)
+					port.getQueue().setBurst(newPeakDataRte);
 				return true;
 			}
 		}
@@ -74,7 +78,7 @@ public class PortManager {
 		for (Iterator<Port> iterator = portInformation.iterator(); iterator.hasNext();) {
 			Port port = (Port) iterator.next();
 			response = response + "Port: " + port.getCategory().getPortNumber() + " Peak Data Rate: "
-					+ port.getPeakDataRate() + " Actived: " + port.isActived() + "\n";
+					+ port.getQueue().getBurst() + " Actived: " + port.isActived() + "\n";
 		}
 
 		response = response + "\n\n\n";
