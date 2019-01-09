@@ -3,6 +3,8 @@ package br.edu.uepb.nutes.haniot;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+//import org.json.JSONArray;
 //import java.util.regex.Pattern;
 //
 //import javax.swing.SwingConstants;
@@ -18,8 +20,8 @@ public class Main {
 	public static void main(String[] args) throws URISyntaxException, Exception {
 //		Port port1 = new Port(1, 1, Category.MONITORING_CENTRAL);
 		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
-		Port port3 = new Port(Category.RMI_IMAGES, 3);
-//		Port port4 = new Port(4, 4, Category.RMI_IMAGES);
+		Port port3 = new Port(Category.CALL_VOIP, 3);
+//		Port port4 = new Port(Category.RMI_IMAGES, 5);
 
 		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3));
 
@@ -28,10 +30,10 @@ public class Main {
 		// Escutando alarmes emitidos pelos dispositivos simulados no OpenICE
 //		JmsMessageListener.initializingAlarmListening();
 
-//		while(true) {
-//			JSONObject queueValue = SwitchController.getPortStatistics("00:00:c0:25:e9:01:28:2a", 123);
-//
-//			long first_duration_sec = queueValue.getLong("duration_sec");
+//		while (true) {
+	
+
+			// long first_duration_sec = queueValue.getLong("duration_sec");
 //			long first_tx_bytes = queueValue.getLong("tx_bytes");
 //
 //			System.out.println("first_duration_sec : " + first_duration_sec + " first_tx_bytes: " + first_tx_bytes);
@@ -49,7 +51,6 @@ public class Main {
 //			
 //			System.out.println(bandwidth + "bps");
 //		}
-//		
 
 //		long start = System.currentTimeMillis();
 //		

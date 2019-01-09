@@ -1,14 +1,14 @@
 package br.edu.uepb.nutes.sdn.apirest;
 
 public class Queue {
-	
+
 	private String uuidQosMonitoringCentral;
 	private String uuidQueueMonitoringCentral;
 	private String name;
 	private long minRate = 0;
 	private long maxRate;
 	private long burst = 0;
-	
+	private long bandwidth = 0;
 
 	public String getUuidQosMonitoringCentral() {
 		return uuidQosMonitoringCentral;
@@ -39,7 +39,11 @@ public class Queue {
 	}
 
 	public void setMinRate(long minRate) {
-		this.minRate = minRate;
+		long qos = Long.parseLong(SwitchController.getMaxrateqos());
+		if (minRate > qos)
+			this.minRate = qos;
+		else
+			this.minRate = minRate;
 	}
 
 	public long getMaxRate() {
@@ -55,10 +59,16 @@ public class Queue {
 	}
 
 	public void setBurst(long burst) {
-		if(burst > this.burst || burst == 0)
+		if (burst > this.burst || burst == 0)
 			this.burst = burst;
 	}
 
-	
+	public long getBandwidth() {
+		return bandwidth;
+	}
+
+	public void setBandwidth(long bandwidth) {
+		this.bandwidth = bandwidth;
+	}
 
 }

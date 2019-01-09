@@ -7,6 +7,7 @@ public class Port {
 	private boolean entryFlow = false;
 //	private long throughputRate = 0;
 	private int time;
+	private String address = null;
 
 	private long minRateQueueMonitoringCentral;
 	
@@ -95,6 +96,16 @@ public class Port {
 	public void stopFlowMonitoring() {
 		// TODO Auto-generated method stub
 		monitor.stopMonitoring();
+	}
+	
+	public void setAddress(String address) {
+		// TODO Auto-generated method stub
+		this.address = address;
+	}
+
+	public String getAddress() {
+		// TODO Auto-generated method stub
+		return address;
 	}
 
 }
