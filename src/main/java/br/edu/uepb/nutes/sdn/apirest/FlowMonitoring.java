@@ -23,17 +23,24 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 	private long actualTopBandwidth;
 	private long downLimit = 0;
 
+	private static boolean strategyOnlyPriority = true;
+
 	public FlowMonitoring(String switchId, Port port) {
 		// TODO Auto-generated constructor stub
 		this.switchId = switchId;
 		this.port = port;
 	}
 
+	public Port getPort() {
+		return port;
+	}
+
 	public void run() {
 		// TODO Auto-generated method stub
 		try {
+
 			if (port.getCategory().getPriority() != null)
-				SwitchController.createQueue(port);
+				SwitchController.createQueue(port, strategyOnlyPriority);
 
 			SwitchController.insertPolitic(switchId, port.getCategory().toString(), port);
 			port.setEntryFlow(true);
@@ -43,31 +50,51 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 				if (port.getAddress() == null)
 					port.setAddress(SwitchController.getIp(switchId, port.getCategory().getPortNumber()));
 
-				this.actualBandwidth = portBandwidthMonitoring();
-
-				this.actualStandardDeviation = standardDeviation();
-
-				this.actualAverageBandwidth = averageBandwidth();
-
-				this.actualTopBandwidth = topBandwidth();
-
 				if (port.getCategory().getDefaultPriority() == null
 						&& port.getCategory().getPriority() != port.getCategory().getDefaultPriority()
 						&& port.getQueue().getUuidQueueMonitoringCentral() == null) {
 					SwitchController.removePolitic(port.getCategory().toString());
-					SwitchController.createQueue(port);
+					SwitchController.createQueue(port, strategyOnlyPriority);
 					SwitchController.insertPolitic(switchId, port.getCategory().toString(), port);
-				} else if (port.getCategory().getPriority() == port.getCategory().getDefaultPriority()
+				} else if (port.getCategory().getDefaultPriority() == null
+						&& port.getCategory().getPriority() == port.getCategory().getDefaultPriority()
 						&& port.getQueue().getUuidQueueMonitoringCentral() != null) {
 					SwitchController.removePolitic(port.getCategory().toString());
 					SwitchController.deleteQueue(port);
 					SwitchController.insertPolitic(switchId, port.getCategory().toString(), port);
 				}
 
-				if (port.getCategory().getPriority() != null)
-					manageDeviceWithPriority();
-				else
-					manageDeviceWithoutPriority();
+				this.actualBandwidth = portBandwidthMonitoring();
+
+				if (!strategyOnlyPriority) {
+
+					this.actualStandardDeviation = standardDeviation();
+
+					this.actualAverageBandwidth = averageBandwidth();
+
+					this.actualTopBandwidth = topBandwidth();
+
+					if (port.getCategory().getPriority() != null)
+						manageDeviceWithPriority();
+					else
+						manageDeviceWithoutPriority();
+				} else {
+					
+					System.out.println("Port: " + port.getCategory().getPortNumber()
+							+ " ActualBandwidth: " + this.actualBandwidth + " Priority: "
+							+ port.getCategory().getPriority() + " IP: " + port.getAddress() + " Interface: "
+							+ port.getCategory().getInterfacePort());
+					
+					if (this.actualBandwidth == 0 && port.isEntryFlow()) {
+						SwitchController.removePolitic(port.getCategory().toString());
+						port.setEntryFlow(false);
+					}
+
+					if (this.actualBandwidth > 0 && !port.isEntryFlow()) {
+						SwitchController.insertPolitic(switchId, port.getCategory().toString(), port);
+						port.setEntryFlow(true);
+					}
+				}
 
 			}
 		} catch (Exception e) {
@@ -77,11 +104,11 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 
 	}
 
-	public boolean initializeMonitoring() {
+	public FlowMonitoring initializeMonitoring() {
 		flowManager = new Thread(this);
 		flowManager.start();
 
-		return false;
+		return this;
 	}
 
 	public boolean stopMonitoring() {
@@ -178,12 +205,25 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 			bandwidthValues.add(bandwidth);
 	}
 
+	public void changePriority(boolean isAlarming) {
+		// TODO Auto-generated method stub
+
+		if (port.getCategory().activeAlarm(isAlarming)) {
+			if (port.getCategory().getDefaultPriority() != null) {
+				System.out.println("Atualizar Prioridade");
+				SwitchController.updateQueue(port, strategyOnlyPriority);
+			}
+		}
+
+	}
+
 	private void manageDeviceWithPriority() throws UnirestException {
 		// TODO Auto-generated method stub
 		System.out.println("Port: " + port.getCategory().getPortNumber() + " MinRate: " + port.getQueue().getMinRate()
 				+ " ActualBandwidth: " + this.actualBandwidth + " DownLimit: " + this.downLimit + " Medium: "
 				+ this.actualAverageBandwidth + " DP: " + this.actualStandardDeviation + " Priority: "
-				+ port.getCategory().getPriority() + " IP: " + port.getAddress() + " Interface: " + port.getCategory().getInterfacePort());
+				+ port.getCategory().getPriority() + " IP: " + port.getAddress() + " Interface: "
+				+ port.getCategory().getInterfacePort());
 
 		if (port.getQueue().getMinRate() < this.actualBandwidth) {
 			System.out.println("Aumentar");
@@ -191,7 +231,7 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 			port.getQueue().setMinRate(this.actualBandwidth);
 			this.downLimit = this.actualAverageBandwidth - standardDeviation();
 
-			SwitchController.updateQueue(port);
+			SwitchController.updateQueue(port, strategyOnlyPriority);
 			if (!port.isEntryFlow()) {
 				SwitchController.insertPolitic(switchId, port.getCategory().toString(), port);
 				port.setEntryFlow(true);
@@ -204,13 +244,13 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 			System.out.println("Diminuir");
 			port.getQueue().setMinRate(this.actualTopBandwidth);
 			this.downLimit = this.actualAverageBandwidth - this.actualStandardDeviation;
-			SwitchController.updateQueue(port);
+			SwitchController.updateQueue(port, strategyOnlyPriority);
 		}
 
 		if (this.actualBandwidth == 0 && port.isEntryFlow()) {
 			port.getQueue().setBurst(this.actualBandwidth);
 			port.getQueue().setMinRate(this.actualBandwidth);
-			SwitchController.updateQueue(port);
+			SwitchController.updateQueue(port, strategyOnlyPriority);
 			bandwidthValues.clear();
 			SwitchController.removePolitic(port.getCategory().toString());
 			port.setEntryFlow(false);
@@ -246,6 +286,7 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 	}
 
 	@SuppressWarnings("unused")
+
 	private long queueBandwidthMonitoring() {
 		// TODO Auto-generated method stub
 		int queue_id;
@@ -284,6 +325,7 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 	}
 
 	@SuppressWarnings("unused")
+
 	private long mediumUpStandardDeviation(long standardDeviation) {
 		// TODO Auto-generated method stub
 		double median = 0;
@@ -304,6 +346,7 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 	}
 
 	@SuppressWarnings("unused")
+
 	private long mediumDownStandardDeviation(long standardDeviation) {
 		// TODO Auto-generated method stub
 		double median = 0.0;

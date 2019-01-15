@@ -16,9 +16,9 @@ public class SwitchController extends ServerCommunication {
 
 	final static String MaxRateQoS = "100000000";
 
-	final static String OVS = "ovs-vsctl --db=ptcp:6640";
+//	final static String OVS = "ovs-vsctl --db=ptcp:6640";
 
-//	final static String OVS = "ovs-vsctl --db=tcp:192.168.2.1:6640";
+	final static String OVS = "ovs-vsctl --db=tcp:192.168.2.1:6640";
 	public static String getMaxrateqos() {
 		return MaxRateQoS;
 	}
@@ -302,7 +302,7 @@ public class SwitchController extends ServerCommunication {
 		return false;
 	}
 
-	static public boolean createQueue(Port port) {
+	static public boolean createQueue(Port port, boolean onlyPriority) {
 
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
@@ -322,13 +322,14 @@ public class SwitchController extends ServerCommunication {
 			}
 
 			String command = OVS + " --id=@queue create queue";
-
-			command += " other-config:min-rate=" + port.getQueue().getMinRate();
-
+			
 			command += " other-config:priority=" + port.getCategory().getPriority();
-
-			command += " other-config:burst=" + port.getQueue().getBurst();
-
+			
+			if(!onlyPriority) {
+				command += " other-config:min-rate=" + port.getQueue().getMinRate();
+				
+				command += " other-config:burst=" + port.getQueue().getBurst();
+			}
 			command += " -- set qos " + port.getQueue().getUuidQosMonitoringCentral() + " queue:"
 					+ port.getCategory().getPortNumber() + "=@queue ";
 
@@ -390,16 +391,22 @@ public class SwitchController extends ServerCommunication {
 		return false;
 	}
 
-	static public boolean updateQueue(Port port) {
+	static public boolean updateQueue(Port port, boolean onlyPriority) {
 
 		Runtime rt = Runtime.getRuntime();
 		Process proc = null;
 		try {
 			if (port.getQueue().getUuidQosMonitoringCentral() != null
 					&& port.getQueue().getUuidQueueMonitoringCentral() != null) {
-				proc = rt.exec(OVS + " set queue " + port.getQueue().getUuidQueueMonitoringCentral()
-						+ " other-config:min-rate=" + port.getQueue().getMinRate() + " other-config:priority="
-						+ port.getCategory().getPriority() + " other-config:burst=" + port.getQueue().getBurst());
+				
+				String command = OVS + " set queue " + port.getQueue().getUuidQueueMonitoringCentral()
+						+ " other-config:priority="	+ port.getCategory().getPriority();
+
+				if(!onlyPriority)
+					command += " other-config:min-rate=" + port.getQueue().getMinRate() 
+							+ " other-config:burst=" + port.getQueue().getBurst();
+				
+				proc = rt.exec(command);
 				proc.waitFor();
 
 				if (proc.exitValue() == 0) {

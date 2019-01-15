@@ -11,7 +11,7 @@ import com.mashape.unirest.request.GetRequest;
 
 public class ServerCommunication {
 
-	private static String hostIp = "http://127.0.0.1:8080";
+	private static String hostIp = "http://127.0.0.1:1234";
 
 	static JsonNode getServerData(String url, JSONObject params) throws UnirestException {
 

@@ -13,11 +13,11 @@ public enum Category {
 	MONITORING_CENTRAL(1, null),
 	MEDICAL_DEVICES(2, 5),
 	CALL_VOIP(3, 5),
-	VIDEO_AUDIO(6, 6),
-	PESSONAL_MEDICAL_DEVICES(6, 6),
-	RMI_IMAGES(6, null),
-	DICOM_IMAGES(6, null),
-	BROWSER(6, null);
+	VIDEO_AUDIO(4, 6),
+	PESSONAL_MEDICAL_DEVICES(4, 6),
+	RMI_IMAGES(4, null),
+	DICOM_IMAGES(4, null),
+	BROWSER(4, null);
 	
 	private final String switchId = "00:00:c0:25:e9:01:28:2a";
 	private final String interfacePort;

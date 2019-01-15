@@ -26,11 +26,13 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 //import br.edu.uepb.nutes.jms.ConsumerMessageListener;
 
-public class PortManager implements MessageListener{
+public class PortManager implements MessageListener {
 
 	private static ArrayList<Port> portInformation = new ArrayList<Port>();
+
+	private static ArrayList<FlowMonitoring> flowMonitoring = new ArrayList<FlowMonitoring>();
 //	private static String hostIp = "192.168.3.1";
-	
+
 	public PortManager(String switchId, ArrayList<Port> ports) {
 		// TODO Auto-generated constructor stub
 		try {
@@ -45,7 +47,9 @@ public class PortManager implements MessageListener{
 
 				for (Port port : portInformation) {
 					System.out.println("Port:" + port.getCategory().getPortNumber());
-					port.initFlowMonitoring(switchId);
+//					port.initFlowMonitoring(switchId);
+
+					flowMonitoring.add(new FlowMonitoring(switchId, port).initializeMonitoring());
 				}
 			}
 		} catch (UnirestException e) {
@@ -53,20 +57,16 @@ public class PortManager implements MessageListener{
 			System.out.println("Não Habilitou a Coleta das Estatísticas");
 		}
 	}
-	
+
 	private void initializingAlarmListening() throws URISyntaxException, Exception {
-		BrokerService broker = BrokerFactory.createBroker(new URI(
-				"broker:(tcp://192.168.3.1:61616)"));
+		BrokerService broker = BrokerFactory.createBroker(new URI("broker:(tcp://192.168.3.1:61616)"));
 		broker.start();
 		Connection connection = null;
 		try {
-			ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
-					"tcp://192.168.3.1:61616");
+			ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.3.1:61616");
 			connection = connectionFactory.createConnection();
-			Session session = connection.createSession(false,
-					Session.AUTO_ACKNOWLEDGE);
+			Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Queue queue = session.createQueue("alarms");
-
 
 			// Consumer
 			MessageConsumer consumer = session.createConsumer(queue);
@@ -86,45 +86,48 @@ public class PortManager implements MessageListener{
 		// TODO Auto-generated method stub
 		TextMessage textMessage = (TextMessage) message;
 		try {
-			
-			JSONObject alarm= new JSONObject(textMessage.getText());
-			
+
+			JSONObject alarm = new JSONObject(textMessage.getText());
+
 			System.out.println(alarm);
-			
-			String deviceId=null;
+
+			String deviceId = null;
 			for (Iterator<String> iterator = alarm.keys(); iterator.hasNext();) {
 				deviceId = (String) iterator.next();
 			}
-			
-			if (deviceId!=null) {
-				
-				if(!alarm.getJSONObject(deviceId).get("Alarm").toString().equals("NORMAL")) {
-					changePriority(alarm.getJSONObject(deviceId).get("Address").toString().replace(" ", ""),true);
-				}else {
-					changePriority(alarm.getJSONObject(deviceId).get("Address").toString().replace(" ", ""),false);
-				}
+
+			if (deviceId != null) {
+				String address = alarm.getJSONObject(deviceId).get("Address").toString().replace(" ", "");
+				for (FlowMonitoring portMonitor : flowMonitoring)
+					if (portMonitor.getPort().getAddress() != null)
+						if (portMonitor.getPort().getAddress().equals(address))
+							if (!alarm.getJSONObject(deviceId).get("Alarm").toString().equals("NORMAL"))
+								portMonitor.changePriority(true);
+							else
+								portMonitor.changePriority(false);
+
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}  catch (JMSException  e) {
+		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private void changePriority(String address, boolean isAlarming) {
-		// TODO Auto-generated method stub
-		for (Port port : portInformation) {
-			System.out.println(port.getAddress());
-			if(port.getAddress().equals(address)) {
-				if(port.getCategory().activeAlarm(isAlarming)) {
-					System.out.println("Atualizar Prioridade");
-					SwitchController.updateQueue(port);
-				}
-			}
-		}
-	}
-	
+//	private void changePriority(String address, boolean isAlarming) {
+//		// TODO Auto-generated method stub
+//		for (Port port : portInformation) {
+//			System.out.println(port.getAddress());
+//			if (port.getAddress().equals(address)) {
+//				if (port.getCategory().activeAlarm(isAlarming)) {
+//					System.out.println("Atualizar Prioridade");
+//					SwitchController.updateQueue(port);
+//				}
+//			}
+//		}
+//	}
+
 //	private static void jmsCommunication(JSONObject device) throws JMSException   {
 //		// TODO Auto-generated method stub
 //		Connection connection = null;
