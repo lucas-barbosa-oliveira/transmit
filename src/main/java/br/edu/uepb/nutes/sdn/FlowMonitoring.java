@@ -144,7 +144,8 @@ public class FlowMonitoring extends ServerCommunication implements Runnable {
 		if (port.getCategory().activeAlarm(isAlarming)) {
 			if (port.getCategory().getDefaultPriority() != null) {
 				System.out.println("Atualizar Prioridade");
-				SwitchController.updateQueue(port, strategyOnlyPriority);
+				SwitchController.deleteQueue(port);
+				SwitchController.createQueue(port, strategyOnlyPriority);
 			}
 		}
 

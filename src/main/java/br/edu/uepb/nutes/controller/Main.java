@@ -17,16 +17,20 @@ public class Main {
 //		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
 //		Port port3 = new Port(Category.CALL_VOIP, 2);
 //		Port port4 = new Port(Category.UDP_TRAFFIC, 2);
+//		
+		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
+		Port port3 = new Port(Category.DICOM_IMAGES, 2);
+		Port port4 = new Port(Category.UDP_TRAFFIC, 2);
+		
+//		Port port2 = new Port(Category.RMI_IMAGES, 2);
+//		Port port3 = new Port(Category.DICOM_IMAGES, 2);
 		
 //		Port port2 = new Port(Category.MEDICAL_DEVICES, 2);
 //		Port port3 = new Port(Category.DICOM_IMAGES, 2);
-//		Port port4 = new Port(Category.UDP_TRAFFIC, 2);
+//		Port port4 = new Port(Category.DICOM_IMAGES_SECOND, 2);
 		
-		Port port2 = new Port(Category.RMI_IMAGES, 2);
-		Port port3 = new Port(Category.DICOM_IMAGES, 2);
-		
-//		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3,port4));
-		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3));
+		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3,port4));
+//		ArrayList<Port> ports = new ArrayList<Port>(Arrays.asList(port2, port3));
 		try {
 			@SuppressWarnings("unused")
 			PortManager manager = new PortManager("00:00:c0:25:e9:01:28:2a", ports);
